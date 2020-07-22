@@ -9,6 +9,9 @@ namespace MonoSnake
         private Random random;
         private Point _gridSize;
         private Snake _snake;
+        public bool IsMouldy { get; set; }
+        public double Age { get; set; } = 0;
+        private double MaxAge { get; set; } = 5;
 
         public Food(Point gridSize, Snake snake)
         {
@@ -16,6 +19,13 @@ namespace MonoSnake
             _snake = snake;
             _gridSize = gridSize;
             NewFood();
+        }
+
+        public void Update(double GameTime)
+        {
+            Age += GameTime;
+            if (Age > MaxAge)
+                IsMouldy = true;
         }
 
         public void NewFood()
@@ -31,10 +41,14 @@ namespace MonoSnake
                     if (position.X == x && position.Y == y)
                         overlapsWithSnake = true;
                 }
-                if(!overlapsWithSnake)
+                if (!overlapsWithSnake)
+                {
                     Position = new Vector2(x, y);
+                    IsMouldy = false;
+                    Age = 0;
+                }
             } while (overlapsWithSnake);
-            
+
         }
     }
 }

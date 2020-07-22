@@ -23,7 +23,7 @@ namespace MonoSnake
         private GameState state = GameState.Playing;
 
         public Point GridSize = new Point(20, 20);
-        public int blockSize = 20;
+        public Point blockSize;
         SpriteFont _font;
 
         public Game1()
@@ -31,10 +31,7 @@ namespace MonoSnake
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-
-
-            _graphics.PreferredBackBufferWidth = (blockSize * GridSize.X) + 25;
-            _graphics.PreferredBackBufferHeight = (blockSize * GridSize.Y) + 25;
+            _graphics.IsFullScreen = true;
         }
 
         protected override void Initialize()
@@ -46,6 +43,9 @@ namespace MonoSnake
 
         protected override void LoadContent()
         {
+            var blockSizeX = Math.Abs(_graphics.GraphicsDevice.Viewport.Width / GridSize.X);
+            var blockSizeY = Math.Abs(_graphics.GraphicsDevice.Viewport.Height / GridSize.Y);
+            blockSize = new Point(blockSizeX, blockSizeY);
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _font = Content.Load<SpriteFont>("SnakeFont");
             newGame();
@@ -55,8 +55,8 @@ namespace MonoSnake
         {
             state = GameState.Playing;
             snake = new Snake(Math.Abs(GridSize.X / 2), Math.Abs(GridSize.Y / 2));
-            food = new Food(GridSize,snake);
-            surface = new Surface(_graphics, _spriteBatch, blockSize, snake, food,GridSize,_font);
+            food = new Food(GridSize, snake);
+            surface = new Surface(_graphics, _spriteBatch, blockSize, snake, food, GridSize, _font);
         }
 
         private bool CheckSnakeOutOfBounds()
@@ -65,7 +65,7 @@ namespace MonoSnake
                     || snake.Position[0].X > GridSize.X
                     || snake.Position[0].Y > GridSize.Y;
         }
-        
+
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -73,6 +73,7 @@ namespace MonoSnake
 
             if (state == GameState.Playing)
             {
+                food.Update(gameTime.ElapsedGameTime.TotalSeconds);
                 surface.Update();
                 if (CheckSnakeOutOfBounds() || snake.SnakeIntersectsSnake)
                 {
@@ -87,7 +88,7 @@ namespace MonoSnake
                 if (keyboardState.IsKeyDown(Keys.Space))
                 {
                     newGame();
-                    
+
                 }
             }
             base.Update(gameTime);
